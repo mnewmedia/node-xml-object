@@ -2,25 +2,25 @@ var lib = {
   traverse: require('traverse'),
   xml: require('xml')
 };
+var addAtribute = true;
 
-function prepareXmlObject(value, addArrAtribute) {
+function prepareXmlObject(value) {
   if (typeof value != 'object') {
     value = {item:value};
   }
   return lib.traverse(value).map(setUpPostProcessing);
 }
 
-function setUpPostProcessing(value, addArrAtribute) {
+function setUpPostProcessing(value) {
   this.after(transformXmlObject);
 }
 
-function transformXmlObject(value, addArrAtribute) {
+function transformXmlObject(value) {
   var type = typeof value;
-
   if (type == 'object') {
     if (Array.isArray(value)) {
       var items = [];
-      addArrAtribute && items.push({_attr:{type:'array'}});
+      if(addAtribute) items.push({_attr:{type:'array'}});
       items = items.concat(value.map(function(item) {
         return {item:item};
       }));
@@ -44,8 +44,8 @@ function transformXmlObject(value, addArrAtribute) {
 }
 
 module.exports = function xml(value, options, addArrAtribute) {
-  if (addArrAtribute !== 'boolean'){
-    addArrAtribute = true;
+  if (typeof addArrAtribute == 'boolean') {
+    addAtribute = addArrAtribute;
   }
-  return lib.xml(prepareXmlObject(value, addArrAtribute), options);
+  return lib.xml(prepareXmlObject(value), options);
 };
