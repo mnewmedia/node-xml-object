@@ -20,7 +20,7 @@ function transformXmlObject(value) {
   if (type == 'object') {
     if (Array.isArray(value)) {
       var items = [];
-      if(addAtribute) items.push({_attr:{type:'array'}});
+      addAtribute && items.push({_attr:{type:'array'}});
       items = items.concat(value.map(function(item) {
         return {item:item};
       }));
@@ -35,7 +35,13 @@ function transformXmlObject(value) {
       var elements = [];
       for (var key in value) {
         var element = {};
-        element[key] = value[key];
+        // fix incomatible xml, tagname is not allowed to start with number
+        // instead <123>val</123> convert to: <key name="123">val</key>
+        if (Number.isInteger(Number.parseInt(key.charAt(0)))) {
+          element['key'] = [{_attr:{name: key}}, value[key]];
+        } else {
+          element[key] = value[key];
+        }
         elements.push(element);
       }
       this.update(elements);
